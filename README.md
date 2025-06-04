@@ -1,113 +1,151 @@
-# IScanWP
+Im still learning, and what better way to learn and code, this is how this script came to light, the aim is for me to be able to automate the whole wordpress recon process or most of it at least. This script is still a work
+in progress, I will be updating it as I go along and have time to do so.
 
-**WordPress Vulnerability Scanner**
+# IScanWP: WordPress Vulnerability Scanner
 
-IScanWP is a command-line utility for enumerating and testing WordPress sites. It leverages the WordPress REST API along with Selenium browser automation to detect core versions, plugins, users, routes, exposed settings, and potential CVEs. Optional brute‑force against `wp-login.php` is supported, as well as an on‑demand search for known plugin exploits.
+IScanWP is a comprehensive command-line utility designed to scan and identify vulnerabilities in WordPress sites. It uses the WordPress REST API, Selenium, and various other techniques to detect
 
-## Features
+   - WordPress core versions
 
-* Detect WordPress core version via HTML meta generator
-* Enumerate plugin namespaces using the REST API
-* List available REST routes and identify sensitive endpoints
-* Enumerate registered users and check for exposed application passwords
-* Test `wp/v2/settings` for public GET and writeable POST
-* **Optional** automated CVE/Exploit search for detected plugins (`-s`/`--search`)
-* Optional brute-force attack against `wp-login.php` with a password list
-* Output results to console and save to a text file
+   - Installed plugins and potential CVEs
 
-## Prerequisites
+   - Registered users and possible exposed passwords
 
-* Python 3.8+
-* Firefox browser
-* GeckoDriver in your PATH
+   - Sensitive endpoints like /wp/v2/settings and /wp/v2/users
 
-### Python packages
+   - SQL injection, XSS vulnerabilities, and missing security headers
 
-```bash
-pip install -r requirements.txt
-```
+The tool also supports brute-force attacks against wp-login.php using a password list, and it can perform a custom scan for known plugin exploits.
+Features
+
+   - WordPress Version Detection: Identifies the WordPress version via the HTML meta tag.
+
+   - Plugin Enumeration: Enumerates installed plugin namespaces through the REST API.
+
+   - Exploit Search: Search for known CVEs and exploits for identified plugins.
+
+   - User Enumeration: Scans the /wp/v2/users endpoint for registered users.
+
+   - Settings Exposure: Tests if sensitive settings are exposed via the /wp/v2/settings endpoint.
+
+   - Writable Settings Test: Checks for writeable settings via POST requests.
+
+   - Directory Bruteforce: Force test for common WordPress subdirectories and custom paths.
+
+   - SQL Injection Testing: Scan for SQL injection vulnerabilities.
+
+   - XSS Testing: Checks for common Cross-Site Scripting (XSS) vulnerabilities.
+
+   - Brute-Force Login: Attempts to brute-force wp-login.php with a custom password list.
+
+   - Security Headers: Identifies missing security headers like X-Content-Type-Options, X-Frame-Options, etc.
+
+   - Result Export: Optionally saves results to a text file for further analysis.
+
+# Prerequisites
+
+   Python 3.8+
+
+   Firefox browser (for Selenium-based automation)
+
+- GeckoDriver (required for Selenium)
 
 ## Installation
 
-1. Clone the repository:
+   Clone the repository:
 
-   ```bash
-   git clone https://github.com/Moe-Dahan/IScanWP.git
-   cd IScanWP
-   ```
-2. Ensure `geckodriver` is installed and accessible:
+      git clone https://github.com/Moe-Dahan/IScanWP.git
+      cd IScanWP
+      
+   Install required Python packages by running:
+    
+    pip install -r requirements.txt
+    
+   - Ensure GeckoDriver is installed and accessible.
 
-   * Download from [Mozilla GeckoDriver releases](https://github.com/mozilla/geckodriver/releases)
-   * Move to `/usr/local/bin` or add to your PATH
+# Usage
 
-## Usage
+To run a scan, use the following command:
 
-```bash
-python iscanwp.py -t <target_url> [-s] [-f <password_file>] [-o <output_file>]
-```
+python iscanwp.py -t <target_url> [-sD <sub_list>] [-sI <sql_list>] [-p <password_file>] [-o <output_file>]
 
-### Arguments
+Arguments
 
-* `-t`, `--target` **(required)**
+    -t, --target (required):
 
-  * Target site URL (e.g., `https://example.com`)
-* `-s`, `--search` **(optional)**
+        The target WordPress site URL (e.g., https://example.com).
 
-  * Enable plugin CVE/exploit search
-* `-f`, `--file` **(optional)**
+    -sD, --sub_list (optional):
 
-  * Path to a newline-separated password file for brute‑force
-* `-o`, `--output` **(optional)**
+        Path to a list of subdirectories to brute-force.
 
-  * Path to save scan results (text file)
+    -sI, --sql_list (optional):
 
-### Examples
+        Path to a list of SQL payloads for SQL injection testing.
 
-* Basic scan:
+    -p, --file (optional):
 
-  ```bash
-  python iscanwp.py -t https://victim.com
-  ```
+        Path to a password file (newline-separated) for brute-forcing wp-login.php.
 
-* Scan with plugin exploit search:
+    -o, --output (optional):
 
-  ```bash
-  python iscanwp.py -t https://victim.com -s
-  ```
+        Path to save scan results to a text file.
 
-* Scan with brute-force and search:
+# Examples
 
-  ```bash
-  python iscanwp.py -t https://victim.com -s -f passwords.txt
-  ```
+    Basic Scan (detect WordPress version, plugins, users, routes):
 
-* Scan and save output:
+python iscanwp.py -t https://victim.com
+ - Scan with Plugin Exploit Search (automatically search for CVEs)
 
-  ```bash
-  python iscanwp.py -t https://victim.com -o results.txt
-  ```
+python iscanwp.py -t https://victim.com -sD /path/to/subdirs.txt
+ - Scan with Directory Bruteforce (using custom subdirectory list)
+ - if left blank will do a common scan of subdirectories
+   
+python iscanwp.py -t https://victim.com -sI /path/to/sql_payloads.txt
+ - SQL Injection Test (scan using custom SQL injection payloads)
+ - if left blank will do a common sqli test
 
-## Output Structure
+python iscanwp.py -t https://victim.com -p /path/to/passwords.txt
+ - Brute-Force Login (using a password file for brute-force testing)
 
-Results saved to the output file include sections for:
+python iscanwp.py -t https://victim.com -o path/to/output/results.txt
+ - Output Structure
 
-1. WordPress version
-2. Detected plugin namespaces
-3. Enumerated usernames and IDs
-4. Discovered REST routes
-5. Useful links (CVE/exploit search results)
-6. Valid credentials (from brute‑force)
+The output saved to a text file includes the following sections:
 
-## Notes
+    WordPress Version: Detected WordPress version.
 
-* Ensure you have permission to scan the target site.
-* Running automated scans or brute‑force attacks without authorization may be illegal.
+    Detected Plugins: List of plugin namespaces.
 
-## License
+    Useful Links: URLs for plugin CVEs or exploits found.
 
-MIT License
+    Enumerated Users: List of user IDs and slugs.
 
----
+    Found Routes: REST API routes discovered (e.g., /wp/v2/users, /wp/v2/settings).
 
-*Use at your own risk.*
+    Writable Settings: Endpoints with writeable settings via POST requests.
 
+    Subdirectories: Found subdirectories through brute-forcing.
+
+    SQL Injection: SQL injection payloads tested and their results.
+
+    Security Headers: Missing security headers.
+
+    XSS Vulnerabilities: Possible Cross-Site Scripting vulnerabilities.
+
+    Valid Credentials: Successfully cracked credentials from brute-force attempts.
+
+Important Notes
+
+    Permissions: Always ensure you have permission to scan the target site. Unauthorized scanning or brute-force attacks may be illegal.
+
+    Brute-Force Caution: Excessive requests may trigger rate-limiting or block the target site. Use brute-force with care.
+
+    False Positives: While the tool is designed to identify vulnerabilities, always manually verify any findings.
+
+License
+
+This project is licensed under the MIT License.
+
+Use at your own risk. IScanWP is intended for ethical use only with explicit permission from the site owner.
